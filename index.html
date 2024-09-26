@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cat Fight Status</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tiny+5:wght@700&display=swap" rel="stylesheet"> 
     <style>
         body {
             background-color: #000;
             color: #fff;
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Tiny 5', sans-serif; /* Use Tiny 5 font */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -16,7 +19,8 @@
             height: 100vh;
             margin: 0;
             padding: 0;
-            overflow: hidden; 
+            overflow: hidden;
+            transition: background 1s ease; /* Add transition for background color */
         }
 
         .container {
@@ -64,6 +68,7 @@
             color: #ff9900; 
         }
 
+        /* Gradient glow effect (optional - you might remove it) */
         .container::before {
             content: "";
             position: absolute;
@@ -93,13 +98,27 @@
 </head>
 <body>
     <div class="container">
+        <!-- Server Card 1 Example -->
         <div class="server-card" id="server1">
-            <h2>Game Server</h2>
+            <h2>Game Server 1</h2>
             <div class="status" id="server1-status">Checking...</div> 
             <div class="ping">Ping: <span id="server1-ping">--</span>ms</div>
         </div>
 
+        <!-- Server Card 2 Example -->
+        <div class="server-card" id="server2">
+            <h2>Game Server 2</h2>
+            <div class="status" id="server2-status">Checking...</div> 
+            <div class="ping">Ping: <span id="server2-ping">--</span>ms</div>
         </div>
+
+        <!-- Server Card 3 Example -->
+        <div class="server-card" id="server3">
+            <h2>Game Server 3</h2>
+            <div class="status" id="server3-status">Checking...</div> 
+            <div class="ping">Ping: <span id="server3-ping">--</span>ms</div>
+        </div>
+    </div>
 
     <script>
         function updateServerStatus(serverId, url) {
@@ -107,13 +126,13 @@
             const statusElement = serverCard.querySelector('.status');
             const pingElement = serverCard.querySelector('.ping');
             const startTime = Date.now();
-            
-            fetch(url, { mode: 'cors' }) 
+
+            fetch(url, { mode: 'cors' })
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! Status: ${response.status}`);
                     }
-                    return response.text(); 
+                    return response.text(); // Or response.json() if the server sends JSON
                 })
                 .then(data => {
                     const endTime = Date.now();
@@ -123,22 +142,37 @@
                     statusElement.classList.remove('offline');
                     statusElement.classList.add('online');
                     pingElement.textContent = `Ping: ${ping}ms`;
+
+                    // Update background color based on ping
+                    updateBackgroundColor(ping);
                 })
                 .catch(error => {
                     statusElement.textContent = 'Offline';
                     statusElement.classList.remove('online');
                     statusElement.classList.add('offline');
                     pingElement.textContent = 'Ping: --ms';
+
+                    // Set background to red for offline
+                    document.body.style.background = 'linear-gradient(135deg, #870000, #190a05)';
                     console.error(`Error pinging ${url}:`, error);
                 });
+        }
+
+        function updateBackgroundColor(ping) {
+            if (ping < 100) {
+                document.body.style.background = 'linear-gradient(135deg, #0d6e00, #061a00)'; // Good ping (green)
+            } else if (ping < 200) {
+                document.body.style.background = 'linear-gradient(135deg, #f09819, #3b2809)'; // OK ping (yellow)
+            } else {
+                document.body.style.background = 'linear-gradient(135deg, #870000, #190a05)'; // High ping (red)
+            }
         }
 
         setInterval(() => {
             updateServerStatus('server1', 'https://ws.catfight.me/');
             updateServerStatus('server2', 'https://api.catfight.me/');
             updateServerStatus('server3', 'http://us-nyc02.pylex.xyz:8148');
-
-        }, 5000); 
+        }, 5000);
     </script>
 </body>
 </html>
