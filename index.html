@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Fight Status</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .server-card {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+            min-width: 250px; 
+        }
+
+        .server-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+        }
+
+        h2 {
+            color: #00ffff; 
+            margin-bottom: 10px;
+        }
+
+        .status {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .online {
+            color: #00ff00; 
+        }
+
+        .offline {
+            color: #ff0000; 
+        }
+
+        .ping {
+            font-size: 14px;
+            color: #ff9900; 
+        }
+
+        .container::before {
+            content: "";
+            position: absolute;
+            top: -50px;
+            left: -50px;
+            right: -50px;
+            bottom: -50px;
+            background: linear-gradient(45deg, #ff00ff, #00ffff, #ff0000, #ffff00, #ff00ff);
+            background-size: 400% 400%;
+            animation: gradientAnimation 10s ease infinite;
+            z-index: -1; 
+            filter: blur(50px);
+        }
+
+        @keyframes gradientAnimation {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="server-card" id="server1">
+            <h2>Game Server</h2>
+            <div class="status" id="server1-status">Checking...</div> 
+            <div class="ping">Ping: <span id="server1-ping">--</span>ms</div>
+        </div>
+
+        </div>
+
+    <script>
+        function updateServerStatus(serverId, url) {
+            const serverCard = document.getElementById(serverId);
+            const statusElement = serverCard.querySelector('.status');
+            const pingElement = serverCard.querySelector('.ping');
+            const startTime = Date.now();
+            
+            fetch(url, { mode: 'cors' }) 
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.text(); 
+                })
+                .then(data => {
+                    const endTime = Date.now();
+                    const ping = endTime - startTime;
+
+                    statusElement.textContent = 'Online';
+                    statusElement.classList.remove('offline');
+                    statusElement.classList.add('online');
+                    pingElement.textContent = `Ping: ${ping}ms`;
+                })
+                .catch(error => {
+                    statusElement.textContent = 'Offline';
+                    statusElement.classList.remove('online');
+                    statusElement.classList.add('offline');
+                    pingElement.textContent = 'Ping: --ms';
+                    console.error(`Error pinging ${url}:`, error);
+                });
+        }
+
+        setInterval(() => {
+            updateServerStatus('server1', 'https://ws.catfight.me/');
+            updateServerStatus('server2', 'https://api.catfight.me/');
+            updateServerStatus('server3', 'http://us-nyc02.pylex.xyz:8148');
+
+        }, 5000); 
+    </script>
+</body>
+</html>
